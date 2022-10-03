@@ -10,6 +10,22 @@ export default function App() {
   if (!isLoading && !!!error) {
     return (
       <>
+        {React.Children.toArray(
+          data.results.map((pokemon) => {
+            return (
+              <div
+                className={`pokemon ${
+                  currentPokemon.data?.data?.name == pokemon.name
+                    ? "cached"
+                    : ""
+                }`}
+                onClick={currentPokemon.changePokemon.bind(this, pokemon.name)}
+              >
+                {pokemon.name}
+              </div>
+            );
+          })
+        )}
         <div>
           <p>
             {currentPokemon.active &&
@@ -33,22 +49,6 @@ export default function App() {
             />
           )}
         </div>
-        {React.Children.toArray(
-          data.results.map((pokemon) => {
-            return (
-              <div
-                className={`pokemon ${
-                  currentPokemon.data?.data?.name == pokemon.name
-                    ? "cached"
-                    : ""
-                }`}
-                onClick={currentPokemon.changePokemon.bind(this, pokemon.name)}
-              >
-                {pokemon.name}
-              </div>
-            );
-          })
-        )}
       </>
     );
   }
