@@ -1,79 +1,11 @@
-import React, { useCallback, useMemo, useRef, useState } from "react";
+import React from "react";
+import { useFetch, usePokemon } from "./hooks";
+import { URL } from "./hooks/constants";
 import "./styles.css";
-
-const useFetch = (url) => {
-  // TODO : add more options
-  // add abort controller
-  const cacheStore = useCache();
-  const [state, setState] = useState({
-    isLoading: true,
-    data: null,
-    error: null
-  });
-  useMemo(async () => {
-    const hasCache = cacheStore.get(url);
-
-    if (hasCache == null) {
-      let data = await fetch(url)
-        .then((res) => res.json())
-        .then((data) => {
-          return {
-            ...state,
-            isLoading: false,
-            data: data
-          };
-        })
-        .catch((e) => {
-          return {
-            ...state,
-            isLoading: false,
-            error: e
-          };
-        });
-      setState(data);
-      cacheStore.set(url, data);
-    } else {
-      setState(hasCache);
-    }
-  }, [url]);
-
-  return {
-    ...state
-  };
-};
-
-const useCache = () => {
-  const cache = useRef({});
-  const set = useCallback((key, data) => {
-    console.log(key, data);
-    cache.current[key] = data;
-  }, []);
-  const get = useCallback((key) => {
-    return cache.current[key] || null;
-  }, []);
-  return {
-    set,
-    get
-  };
-};
-
-const usePokemon = () => {
-  const [active, setActive] = useState(null);
-  const data = useFetch("https://pokeapi.co/api/v2/pokemon/" + active);
-
-  const changePokemon = useCallback((name) => setActive(name), [active]);
-  return {
-    active,
-    changePokemon,
-    data
-  };
-};
 
 export default function App() {
   const currentPokemon = usePokemon();
-  const { isLoading, data, error } = useFetch(
-    "https://pokeapi.co/api/v2/pokemon/"
-  );
+  const { isLoading, data, error } = useFetch(URL.GET_POKEMON);
 
   if (!isLoading && !!!error) {
     return (
@@ -105,6 +37,11 @@ export default function App() {
           data.results.map((pokemon) => {
             return (
               <div
+                className={`pokemon ${
+                  currentPokemon.data?.data?.name == pokemon.name
+                    ? "cached"
+                    : ""
+                }`}
                 onClick={currentPokemon.changePokemon.bind(this, pokemon.name)}
               >
                 {pokemon.name}
